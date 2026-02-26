@@ -1,6 +1,8 @@
 package com.figai.food.injestion.service
 
 import com.figai.food.injestion.dto.ProjectDTO
+import com.figai.food.injestion.exceptions.BadRequestException
+import com.figai.food.injestion.exceptions.NotFoundException
 import com.figai.food.injestion.factory.ProjectDTOFactory
 import com.figai.food.injestion.model.*
 import com.figai.food.injestion.repository.ProjectRepository
@@ -25,11 +27,11 @@ class ProjectService(
     fun addIngredient(projectId: Long, ingredientId: Long) {
         val project = projectRepository
             .findById(projectId)
-            .orElseThrow { RuntimeException("Project not found") }
+            .orElseThrow { NotFoundException("Project not found") }
 
         val ingredient = ingredientRepository
             .findById(ingredientId)
-            .orElseThrow { RuntimeException("Ingredient not found") }
+            .orElseThrow { NotFoundException("Ingredient not found") }
 
         if (project.projectIngredients.any { it.ingredient?.id == ingredientId })
             return
@@ -42,11 +44,11 @@ class ProjectService(
     fun removeIngredient(projectId: Long, ingredientId: Long) {
         val project = projectRepository
             .findById(projectId)
-            .orElseThrow { RuntimeException("Project not found") }
+            .orElseThrow { NotFoundException("Project not found") }
 
         project.removeIngredient(ingredientRepository
             .findById(ingredientId)
-            .orElseThrow { RuntimeException("Ingredient not found") })
+            .orElseThrow { NotFoundException("Ingredient not found") })
 
         projectRepository.save(project)
     }
@@ -59,7 +61,7 @@ class ProjectService(
     fun getProject(projectId: Long): ProjectDTO {
         val project = projectRepository
             .findById(projectId)
-            .orElseThrow { RuntimeException("Project not found") }
+            .orElseThrow { NotFoundException("Project not found") }
         return ProjectDTOFactory.fromEntity(project)
     }
 
@@ -67,10 +69,10 @@ class ProjectService(
     fun submitProject(projectId: Long) {
         val project = projectRepository
             .findById(projectId)
-            .orElseThrow { RuntimeException("Project not found") }
+            .orElseThrow { NotFoundException("Project not found") }
 
         if (project.status != "Draft")
-            throw RuntimeException("Project already submitted")
+            throw BadRequestException("Project already submitted")
 
         project.status = "Submitted"
         projectRepository.save(project)

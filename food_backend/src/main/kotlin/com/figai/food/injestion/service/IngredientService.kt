@@ -21,7 +21,7 @@ class IngredientService(private val repository: IngredientRepository) {
         page: Int,
         size: Int
     ): Page<IngredientDTO> {
-        val spec: Specification<*> = Specification.where(
+        val spec: Specification<IngredientEntity> = Specification.where(
             IngredientSpecifications.hasCategory(category)
         ).and(IngredientSpecifications.listingContains(listing))
             .and(IngredientSpecifications.sourcingContains(sourcing))
@@ -29,7 +29,7 @@ class IngredientService(private val repository: IngredientRepository) {
 
         val pageable = PageRequest.of(page, size)
 
-        return repository.findAll(spec as Specification<IngredientEntity>, pageable)
+        return repository.findAll(spec, pageable)
             .map { IngredientDTOFactory.fromEntity(it) }
     }
 
